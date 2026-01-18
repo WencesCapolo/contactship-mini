@@ -159,6 +159,9 @@ The server will be available at `http://localhost:3000`.
 
 ## 📖 API Reference
 
+> 📘 **Interactive API docs available at:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)  
+> Click "Authorize" and enter your API key to test endpoints directly.
+
 All endpoints require the `x-api-key` header for authentication.
 
 ### Leads Endpoints
@@ -210,7 +213,7 @@ curl http://localhost:3000/leads/jobs/{jobId} \
 |----------|----------|-------------|
 | `DATABASE_URL` | ✅ | PostgreSQL connection string |
 | `REDIS_URL` | ✅ | Redis connection URL |
-| `OPENAI_API_KEY` | ✅ | OpenAI API key for GPT-4o-mini |
+| `OPENAI_API_KEY` | ✅ | OpenAI API key for GPT-4o-mini | (the model could be simply changed by customizing the `OpenAIService`)
 | `API_KEY` | ✅ | API key for endpoint authentication |
 | `PORT` | ❌ | Server port (default: 3000) |
 
