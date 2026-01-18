@@ -13,17 +13,41 @@ import {
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
+import { LeadsQueueService } from '../leads-queue/leads-queue.service';
 
 @Controller('leads')
 export class LeadsController {
-  constructor(private readonly leadsService: LeadsService) { }
+  constructor(
+    private readonly leadsService: LeadsService,
+    private readonly leadsQueueService: LeadsQueueService,
+  ) { }
 
   /**
-   * POST /leads - Create a new lead manually
+   * POST /leads - Create a new lead (queued for async processing)
+   * Returns the job ID for tracking
    */
   @Post()
-  create(@Body() createLeadDto: CreateLeadDto) {
-    return this.leadsService.create(createLeadDto);
+  async create(@Body() createLeadDto: CreateLeadDto) {
+    return this.leadsQueueService.addCreateLeadJob(createLeadDto);
+  }
+
+  /**
+   * POST /leads/:id/summarize - Queue a lead for AI summarization
+   * Returns the job ID for tracking
+   */
+  @Post(':id/summarize')
+  async summarize(@Param('id') id: string) {
+    // Verify lead exists first
+    await this.leadsService.findOne(id);
+    return this.leadsQueueService.addSummarizeJob(id);
+  }
+
+  /**
+   * GET /leads/jobs/:jobId - Get job status
+   */
+  @Get('jobs/:jobId')
+  async getJobStatus(@Param('jobId') jobId: string) {
+    return this.leadsQueueService.getJobStatus(jobId);
   }
 
   /**
@@ -82,4 +106,3 @@ export class LeadsController {
     return this.leadsService.remove(id);
   }
 }
-

@@ -11,10 +11,10 @@ export class RandomUserService {
 
     /**
      * Fetch random users from the randomuser.me API
-     * @param count Number of users to fetch (default: 5)
+     * @param count Number of users to fetch (default: 10)
      * @returns Array of random users
      */
-    async fetchRandomUsers(count: number = 5): Promise<RandomUser[]> {
+    async fetchRandomUsers(count: number = 10): Promise<RandomUser[]> {
         try {
             this.logger.log(`Fetching ${count} random users from randomuser.me`);
 
