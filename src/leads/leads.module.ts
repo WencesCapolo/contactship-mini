@@ -9,6 +9,7 @@ import { LeadsQueueModule } from '../leads-queue/leads-queue.module';
   imports: [RandomUserModule, PrismaModule, LeadsQueueModule],
   controllers: [LeadsController],
   providers: [LeadsService],
+  exports: [LeadsService],
 })
 export class LeadsModule { }
 

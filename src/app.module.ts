@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { LeadsModule } from './leads/leads.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LeadsQueueModule } from './leads-queue/leads-queue.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { LeadsQueueModule } from './leads-queue/leads-queue.module';
     PrismaModule,
     LeadsModule,
     LeadsQueueModule,
+    ScheduleModule.forRoot(),
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [AppService],
