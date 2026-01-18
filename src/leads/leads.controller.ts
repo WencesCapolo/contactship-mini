@@ -9,7 +9,9 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { LeadsService } from './leads.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -86,6 +88,8 @@ export class LeadsController {
    * GET /leads/:id - Get a single lead by ID
    */
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60000) // 60 seconds
   findOne(@Param('id') id: string) {
     return this.leadsService.findOne(id);
   }
