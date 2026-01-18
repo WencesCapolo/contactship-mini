@@ -19,6 +19,14 @@ enum LeadSource {
   RANDOM_USER_API
 }
 
+// Enum for AI summarization status
+enum AiStatus {
+  IDLE
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 // Main Lead model
 model Lead {
   id          String      @id @default(uuid())
@@ -46,6 +54,7 @@ model Lead {
   picture     String?     // URL to profile picture
   
   // AI-generated fields
+  aiStatus    AiStatus    @default(IDLE)
   aiSummary   String?
   nextAction  String?
   

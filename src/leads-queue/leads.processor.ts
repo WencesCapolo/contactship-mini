@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { RandomUserService } from '../random-user/random-user.service';
+import { OpenAIService } from '../openai/openai.service';
 
 export interface CreateLeadJobData {
     firstName: string;
@@ -30,6 +31,7 @@ export class LeadsProcessor extends WorkerHost {
     constructor(
         private readonly prisma: PrismaService,
         private readonly randomUserService: RandomUserService,
+        private readonly openAIService: OpenAIService,
     ) {
         super();
     }
@@ -76,21 +78,37 @@ export class LeadsProcessor extends WorkerHost {
             throw new Error(`Lead with ID ${leadId} not found`);
         }
 
-        // TODO: Integrate with actual AI service (OpenAI, etc.)
-        // For now, generate a placeholder summary
-        const aiSummary = `${lead.firstName} ${lead.lastName} from ${lead.city || 'unknown city'}, ${lead.country || 'unknown country'}. Contact: ${lead.email}${lead.phone ? `, ${lead.phone}` : ''}.`;
-        const nextAction = `Follow up with ${lead.firstName} via email to introduce services.`;
+        try {
+            // Call OpenAI to generate summary and next action
+            const result = await this.openAIService.summarizeLead(lead);
 
-        const updatedLead = await this.prisma.lead.update({
-            where: { id: leadId },
-            data: {
-                aiSummary,
-                nextAction,
-            },
-        });
+            // Update lead with AI results and set status to COMPLETED
+            const updatedLead = await this.prisma.lead.update({
+                where: { id: leadId },
+                data: {
+                    aiStatus: 'COMPLETED',
+                    aiSummary: result.summary,
+                    nextAction: result.next_action,
+                },
+            });
 
-        this.logger.log(`Lead ${leadId} summarized successfully`);
-        return { leadId: updatedLead.id, aiSummary, nextAction };
+            this.logger.log(`Lead ${leadId} summarized successfully`);
+            return {
+                summary: updatedLead.aiSummary,
+                next_action: updatedLead.nextAction,
+            };
+        } catch (error) {
+            // Update lead status to FAILED on error
+            await this.prisma.lead.update({
+                where: { id: leadId },
+                data: {
+                    aiStatus: 'FAILED',
+                },
+            });
+
+            this.logger.error(`Failed to summarize lead ${leadId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw error;
+        }
     }
 
     @OnWorkerEvent('completed')
@@ -103,3 +121,4 @@ export class LeadsProcessor extends WorkerHost {
         this.logger.error(`Job ${job.id} failed: ${error.message}`);
     }
 }
+

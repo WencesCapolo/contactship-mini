@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
   UseInterceptors,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { LeadsService } from './leads.service';
@@ -35,13 +37,23 @@ export class LeadsController {
 
   /**
    * POST /leads/:id/summarize - Queue a lead for AI summarization
-   * Returns the job ID for tracking
+   * Sets aiStatus to PROCESSING and returns 202 with job tracking info
    */
   @Post(':id/summarize')
+  @HttpCode(HttpStatus.ACCEPTED)
   async summarize(@Param('id') id: string) {
-    // Verify lead exists first
-    await this.leadsService.findOne(id);
-    return this.leadsQueueService.addSummarizeJob(id);
+    // Verify lead exists and set status to PROCESSING
+    await this.leadsService.setAiProcessing(id);
+
+    // Add job to queue
+    const { jobId } = await this.leadsQueueService.addSummarizeJob(id);
+
+    return {
+      message: 'AI Summarization started',
+      leadId: id,
+      status: 'PROCESSING',
+      jobId,
+    };
   }
 
   /**

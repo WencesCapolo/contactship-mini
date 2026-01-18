@@ -55,6 +55,18 @@ export class LeadsService {
   }
 
   /**
+   * Set lead's AI status to PROCESSING before queuing summarization
+   */
+  async setAiProcessing(id: string) {
+    await this.findOne(id); // Throws if not found
+
+    return this.prisma.lead.update({
+      where: { id },
+      data: { aiStatus: 'PROCESSING' },
+    });
+  }
+
+  /**
    * Update a lead by ID
    */
   async update(id: string, updateLeadDto: UpdateLeadDto) {
