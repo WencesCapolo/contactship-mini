@@ -107,14 +107,6 @@ export class LeadsController {
   }
 
   /**
-   * PATCH /leads/:id - Update a lead by ID
-   */
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLeadDto: UpdateLeadDto) {
-    return this.leadsService.update(id, updateLeadDto);
-  }
-
-  /**
    * DELETE /leads/:id - Delete a lead by ID
    */
   @Delete(':id')
